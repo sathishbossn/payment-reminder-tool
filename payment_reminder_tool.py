@@ -1,32 +1,39 @@
 import streamlit as st
 from datetime import date
+import time
 import streamlit.components.v1 as components
 
-# ---------------- CONFIG ----------------
-APP_PASSWORD = "pay123"
+# ================= CONFIG =================
+APP_PASSWORD = "pay123"        # 🔑 change anytime
+SESSION_TIMEOUT = 1800         # 30 minutes
 
 st.set_page_config(
     page_title="Payment Reminder Generator",
-    layout="centered",
+    layout="centered"
 )
 
-# ---------------- SESSION LOGIN ----------------
+# ================= SESSION INIT =================
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
 
+if "last_active" not in st.session_state:
+    st.session_state.last_active = time.time()
+
+# ================= LOGIN FUNCTION =================
 def login():
     if st.session_state.password == APP_PASSWORD:
         st.session_state.logged_in = True
+        st.session_state.last_active = time.time()
     else:
         st.error("❌ Incorrect password")
 
-# ---------------- LOGIN SCREEN ----------------
+# ================= LOGIN SCREEN =================
 if not st.session_state.logged_in:
     st.markdown(
         """
         <div style="text-align:center; padding:40px;">
             <h1>🔐 Secure Access</h1>
-            <p style="color:gray;">Enter your access password to continue</p>
+            <p style="color:gray;">Enter your access password</p>
         </div>
         """,
         unsafe_allow_html=True,
@@ -36,26 +43,42 @@ if not st.session_state.logged_in:
         "Password",
         type="password",
         key="password",
-        on_change=login,
+        on_change=login
     )
 
     st.stop()
 
-# ---------------- APP UI ----------------
+# ================= SESSION TIMEOUT =================
+current_time = time.time()
+
+if current_time - st.session_state.last_active > SESSION_TIMEOUT:
+    st.session_state.logged_in = False
+    st.experimental_rerun()
+
+st.session_state.last_active = current_time
+
+# ================= LOGOUT BUTTON =================
+col1, col2 = st.columns([1, 6])
+with col1:
+    if st.button("🚪 Logout"):
+        st.session_state.logged_in = False
+        st.experimental_rerun()
+
+# ================= APP UI =================
 st.markdown("## 💬 Payment Reminder Message Generator")
-st.caption("Generate polite, professional, or firm reminders in seconds")
+st.caption("Polite • Professional • Firm — ready-to-send messages")
 
 st.markdown("---")
 
-# ---------- INPUT SECTION ----------
-col1, col2 = st.columns(2)
+# ================= INPUTS =================
+left, right = st.columns(2)
 
-with col1:
+with left:
     client = st.text_input("Client Name")
     invoice = st.text_input("Invoice Number")
     amount = st.text_input("Invoice Amount")
 
-with col2:
+with right:
     currency = st.selectbox(
         "Currency",
         ["USD ($)", "EUR (€)", "GBP (£)", "INR (₹)"]
@@ -73,7 +96,7 @@ currency_symbol = {
     "INR (₹)": "₹"
 }[currency]
 
-# ---------- COPY BUTTON ----------
+# ================= COPY BUTTON =================
 def copy_button(text):
     components.html(
         f"""
@@ -81,7 +104,7 @@ def copy_button(text):
         style="
         background:#2563eb;
         color:white;
-        padding:6px 14px;
+        padding:8px 16px;
         border:none;
         border-radius:8px;
         cursor:pointer;
@@ -89,10 +112,10 @@ def copy_button(text):
         📋 Copy message
         </button>
         """,
-        height=45,
+        height=45
     )
 
-# ---------- GENERATE ----------
+# ================= GENERATE =================
 st.markdown("### 📩 Generated Messages")
 
 if st.button("🚀 Generate Messages", use_container_width=True):
