@@ -53,7 +53,7 @@ current_time = time.time()
 
 if current_time - st.session_state.last_active > SESSION_TIMEOUT:
     st.session_state.logged_in = False
-    st.experimental_rerun()
+    st.rerun()   # ✅ FIXED
 
 st.session_state.last_active = current_time
 
@@ -62,7 +62,7 @@ col1, col2 = st.columns([1, 6])
 with col1:
     if st.button("🚪 Logout"):
         st.session_state.logged_in = False
-        st.experimental_rerun()
+        st.rerun()   # ✅ FIXED
 
 # ================= APP UI =================
 st.markdown("## 💬 Payment Reminder Message Generator")
