@@ -1,4 +1,8 @@
 import streamlit as st
+PASSWORD = "pay123"
+pwd = st.text_input("Enter Access Password", type="password")
+if pwd != PASSWORD:
+    st.stop()
 from datetime import date
 
 st.set_page_config(page_title="Payment Reminder Generator", layout="centered")
@@ -45,3 +49,4 @@ if st.button("Generate Messages"):
 
         for msg in messages:
             st.code(msg)
+
