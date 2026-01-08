@@ -1,5 +1,6 @@
 import streamlit as st
 from datetime import date
+import streamlit.components.v1 as components
 
 # ---------------- PASSWORD ----------------
 APP_PASSWORD = "pay123"
@@ -17,7 +18,6 @@ st.markdown("---")
 st.title("💬 Payment Reminder Message Generator")
 st.write("Generate polite, professional, or firm payment reminders in seconds.")
 
-# Inputs
 client = st.text_input("Client Name")
 invoice = st.text_input("Invoice Number")
 
@@ -27,7 +27,6 @@ currency = st.selectbox(
 )
 
 amount = st.text_input("Invoice Amount")
-
 due_date = st.date_input("Invoice Due Date", value=date.today())
 
 tone = st.selectbox(
@@ -35,7 +34,6 @@ tone = st.selectbox(
     ["Friendly", "Professional", "Firm"]
 )
 
-# Currency symbol mapping
 currency_symbol = {
     "USD ($)": "$",
     "EUR (€)": "€",
@@ -43,7 +41,25 @@ currency_symbol = {
     "INR (₹)": "₹"
 }[currency]
 
-# Generate messages
+# ---------------- COPY FUNCTION ----------------
+def copy_button(text):
+    components.html(
+        f"""
+        <button onclick="navigator.clipboard.writeText(`{text}`)"
+        style="
+        background-color:#4CAF50;
+        color:white;
+        padding:6px 12px;
+        border:none;
+        border-radius:6px;
+        cursor:pointer;">
+        📋 Copy
+        </button>
+        """,
+        height=40,
+    )
+
+# ---------------- GENERATE ----------------
 if st.button("Generate Messages"):
     if not client or not invoice or not amount:
         st.warning("Please fill all required fields.")
@@ -64,18 +80,13 @@ if st.button("Generate Messages"):
                 f"Dear {client}, please advise if there are any issues preventing payment of Invoice {invoice}."
             ]
 
-        else:  # Firm
+        else:
             messages = [
                 f"Dear {client}, Invoice {invoice} for {currency_symbol}{amount} remains unpaid despite being due on {due_date}.",
                 f"This is a follow-up regarding the overdue Invoice {invoice}. Please confirm payment status.",
                 f"Kindly treat this as a final reminder for Invoice {invoice}."
             ]
 
-        # Display with copy buttons
         for i, msg in enumerate(messages, start=1):
             st.text_area(f"Message {i}", msg, height=90)
-            st.button(
-                f"📋 Copy Message {i}",
-                on_click=st.write,
-                args=(msg,)
-            )
+            copy_button(msg)
